@@ -33,8 +33,9 @@ def runCamera(video_label: QLabel):
         ret, img = cap.read()
         
         if ret:
-            recog_image = hand.drawHandPoint(img)
-            print(hand.fingerClose(img))
+            recog = hand.HandRecog(img)
+            print(recog.fingerClose(img))
+            recog_image = recog.drawHandPoint()
             
             img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB) 
             h, w, c = img.shape
@@ -92,7 +93,7 @@ class MyApp(QWidget):
 
     def closeEvent(self, e: QCloseEvent | None) -> None:
         self.stopCamera()
-        hand.closeHandModel()
+        hand.closeHandModel()  #* must close the model
         print("exit")
 
 
