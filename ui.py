@@ -17,6 +17,9 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtCore import *
 
+import hand
+
+
 cam_running = False
 
 def runCamera(video_label: QLabel):
@@ -26,14 +29,15 @@ def runCamera(video_label: QLabel):
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     video_label.resize(int(width), int(height))
     
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    
     while cam_running:
         ret, img = cap.read()
         
         if ret:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
-            h,w,c = img.shape
+            recog_image = hand.drawHandPoint(img)
+            print(hand.fingerClose(img))
+            
+            img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB) 
+            h, w, c = img.shape
 
             qImg = QImage(img.data, w, h, w*c, QImage.Format.Format_RGB888)
             pixmap = QPixmap.fromImage(qImg)
@@ -88,6 +92,7 @@ class MyApp(QWidget):
 
     def closeEvent(self, e: QCloseEvent | None) -> None:
         self.stopCamera()
+        hand.closeHandModel()
         print("exit")
 
 

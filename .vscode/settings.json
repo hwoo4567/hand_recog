@@ -1,4 +1,20 @@
 {
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.autoImportCompletions": true
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.autoImportCompletions": false,
+    
+    "terminal.integrated.profiles.windows": {
+        "myPowerShell": {
+            "source": "PowerShell",
+            "args": [
+                "-NoExit",
+                "-Command ",
+                "conda activate base;",
+                "C:/dev/anaconda3/Scripts/activate;",
+                "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8;",
+                "[Console]::InputEncoding = [System.Text.Encoding]::UTF8;",
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "myPowerShell",  // UTF-8 && conda 'base'
+
 }
