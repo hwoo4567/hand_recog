@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+import os  # temp: for debug
 
 FINGER_CLOSE_THRESHOLD = 0.1
 
@@ -17,7 +18,7 @@ class HandRecog:
         self.frame = frame
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         self.results = hands.process(rgb_frame)
-        
+                
     def drawHandPoint(self):
         if self.results.multi_hand_landmarks:
             # 각 손에 대한 반복
@@ -43,7 +44,7 @@ class HandRecog:
             fingers = handLms.landmark  # index 0 - 20
             
             # n번째 손가락 끝의 번호 : n * 4
-            tip = fingers[finger_n * 4]  # 검지 끝
+            tip = fingers[int(finger_n * 4)]  # 검지 끝
             hand_center = fingers[0]
             
             d = dist(tip.x, tip.y, hand_center.x, hand_center.y)
@@ -53,6 +54,17 @@ class HandRecog:
                 return False
         else:
             return False
+    
+    def getCenterPoint(self) -> tuple[float, float]:  # x, y 범위 0 ~ 1
+        if self.results.multi_hand_landmarks:
+            # 여러 손이 인식되면 그 중 하나만
+            handLms = self.results.multi_hand_landmarks[0]
+            fingers = handLms.landmark  # index 0 - 20
+            center = fingers[0]  # 손바닥
+                        
+            return center.x, center.y
+        
+        return -1.0, -1.0
 
 def closeHandModel():
     hands.close()

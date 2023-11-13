@@ -19,7 +19,7 @@ from PyQt5.QtCore import *
 
 import hand
 
-
+image_flip = True
 cam_running = False
 
 def runCamera(video_label: QLabel):
@@ -30,14 +30,14 @@ def runCamera(video_label: QLabel):
     video_label.resize(int(width), int(height))
     
     while cam_running:
-        ret, img = cap.read()
+        ret, frame = cap.read()
         
         if ret:
-            recog = hand.HandRecog(img)
-            print(recog.fingerClose(img))
+            recog = hand.HandRecog(cv2.flip(frame, 1))
             recog_image = recog.drawHandPoint()
+            recog.getCenterPoint()
             
-            img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB) 
+            img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB)
             h, w, c = img.shape
 
             qImg = QImage(img.data, w, h, w*c, QImage.Format.Format_RGB888)
