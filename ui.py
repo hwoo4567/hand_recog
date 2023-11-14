@@ -18,9 +18,12 @@ from PyQt5.QtGui import (
 from PyQt5.QtCore import *
 
 import hand
+import pyautogui
 
 image_flip = True
 cam_running = False
+pyautogui.PAUSE = 0.0
+pyautogui.FAILSAFE = False
 
 def runCamera(video_label: QLabel):
     global cam_running
@@ -35,7 +38,13 @@ def runCamera(video_label: QLabel):
         if ret:
             recog = hand.HandRecog(cv2.flip(frame, 1))
             recog_image = recog.drawHandPoint()
-            recog.getCenterPoint()
+            x, y = recog.getForefingerPoint()
+            screen = QApplication.primaryScreen().size()
+            screenX, screenY = screen.width(), screen.height()
+            
+            pyautogui.moveTo(int(screenX * x), int(screenY * y))
+            
+            # TODO: 손떨림 방지 기능 만들기, 손가락 인식에 margin 넣기
             
             img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB)
             h, w, c = img.shape

@@ -54,17 +54,23 @@ class HandRecog:
                 return False
         else:
             return False
-    
-    def getCenterPoint(self) -> tuple[float, float]:  # x, y 범위 0 ~ 1
+        
+    def getPointFromIdx(self, idx: int) -> tuple[float, float]:
         if self.results.multi_hand_landmarks:
             # 여러 손이 인식되면 그 중 하나만
             handLms = self.results.multi_hand_landmarks[0]
             fingers = handLms.landmark  # index 0 - 20
-            center = fingers[0]  # 손바닥
+            center = fingers[idx]
                         
             return center.x, center.y
         
         return -1.0, -1.0
+    
+    def getCenterPoint(self) -> tuple[float, float]:  # x, y 범위 0 ~ 1
+        return self.getPointFromIdx(0)  # 손바닥
+    
+    def getForefingerPoint(self) -> tuple[float, float]:
+        return self.getPointFromIdx(8)  # 검지 손가락 끝
 
 def closeHandModel():
     hands.close()
