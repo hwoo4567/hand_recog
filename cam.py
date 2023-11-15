@@ -1,6 +1,8 @@
 import cv2
-import hand
 import pyautogui
+import hand
+import gesture as g
+import os  # for log message
 
 pyautogui.PAUSE = 0.0
 pyautogui.FAILSAFE = False
@@ -32,7 +34,7 @@ def init():
     ret, frame = cap.read()
     
     if ret:
-        recog_info = hand.HandRecog(cv2.flip(cv2.flip(frame, 0), 1))  # 상하, 좌우 반전
+        recog_info = hand.HandRecog(cv2.flip(cv2.flip(frame, 0), 1), stabilization=True)  # 상하, 좌우 반전
     else:
         recog_info = None
     
@@ -57,17 +59,34 @@ def controlMouseByFrame():
         return
     
     if recog_info.handExists():
-        cam_x, cam_y = recog_info.getForefinger()
+        cam_x, cam_y = recog_info.getStandardPoint()
         screen_x, screen_y = pyautogui.size()
         x, y = posInMargin(cam_x), posInMargin(cam_y)
         
-        pyautogui.moveTo(int(screen_x * x), int(screen_y * y))
+        pyautogui.moveTo(int(screen_x * x), int(screen_y * y), duration=0.1)
         
-        print(recog_info.isFingerClose(1), recog_info.isFingerClose(2), recog_info.isFingerClose(3), recog_info.isFingerClose(4), recog_info.isFingerClose(5))
-        # if recog_info.isAllClose():
-        #     pyautogui.mouseDown(button="middle")
-        # else:
-        #     pyautogui.mouseUp(button="middle")
+        temp = recog_info.isFingerClose(2), recog_info.isFingerClose(3), recog_info.isFingerClose(4), recog_info.isFingerClose(5)
+        gesture = tuple(int(not i) for i in temp)
+        
+        # os.system("cls")
+        # print(gesture)
+        
+        if gesture == g.middle_click:
+            pyautogui.mouseDown(button="middle")
+        else:
+            pyautogui.mouseUp(button="middle")
+            
+        if gesture == g.shift_middle_click:
+            pyautogui.mouseDown(button="middle")
+            pyautogui.keyDown("shift")
+        else:
+            pyautogui.mouseUp(button="middle")
+            pyautogui.keyUp("shift")
+
+        if gesture == g.left_click:
+            pyautogui.mouseDown(button="left")
+        else:
+            pyautogui.mouseUp(button="left")
 
 def closeCam():
     global cap

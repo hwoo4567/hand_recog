@@ -21,14 +21,14 @@ from PyQt5.QtCore import (
 import cam
 
 class MyApp(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.initUI()
         
     def initUI(self):
         self.setWindowTitle("Hand Recog")
         self.move(100, 100)
-        self.resize(500, 300)
+        self.resize(500, 400)
         
         vbox = QVBoxLayout()
         self.video_label = QLabel()

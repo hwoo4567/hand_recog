@@ -1,22 +1,55 @@
+from typing import Any
 import cv2
 import numpy as np
 import mediapipe as mp
 import typing
 
-FINGER_CLOSE_THRESHOLD = 0.04
+FINGER_CLOSE_THRESHOLD = 0.03
+STABLE_RADIUS = 0.01
 
 mp_draw = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 
-def dist(x1, y1, x2, y2):
-    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+class Stabilizer:
+    singleton = None
+    
+    def __init__(self) -> None:
+        self.prev_vec = None
+    
+    @classmethod
+    def get(cls):
+        if cls.singleton is None:
+            cls.singleton = Stabilizer()
+            return cls.singleton
+        else:
+            return cls.singleton
+        
+    def __call__(self, x, y) -> tuple[float, float]:
+        vec = np.array([x, y])
+        if self.prev_vec is None:
+            self.prev_vec = vec
+            return x, y
 
+        # stabilization
+        diff = np.linalg.norm(self.prev_vec - vec)
+        print(diff)
+        if diff < STABLE_RADIUS:
+            return self.prev_vec[0], self.prev_vec[1]
+        else:
+            self.prev_vec = vec
+            return x, y
+        
 class HandRecog:
-    def __init__(self, frame):
+    def __init__(self, frame, stabilization=False):
         """frame: image(MatLike) read from cap.read()"""
         
         self.frame = frame
+        
+        if stabilization:
+            self.stabilizer = Stabilizer.get()
+        else:
+            self.stabilizer = None
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         if rgb_frame is not None:
@@ -89,12 +122,14 @@ class HandRecog:
         
         # 손이 없으면 항상 중간점
         return 0.5, 0.5
-    
-    def getCenter(self) -> tuple[float, float]:  # x, y 범위 0 ~ 1
-        return self.getPointFromIdx(0)  # 손바닥
-    
-    def getForefinger(self) -> tuple[float, float]:
-        return self.getPointFromIdx(8)  # 검지 손가락 끝
+        
+    def getStandardPoint(self) -> tuple[float, float]:
+        x, y = self.getPointFromIdx(9)  # 중지 손가락 관절 시작 부분
+        
+        if self.stabilizer is None:
+            return x, y
+        else:
+            return self.stabilizer(x, y)
 
 def closeHandModel():
     hands.close()
