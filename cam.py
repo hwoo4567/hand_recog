@@ -6,7 +6,7 @@ pyautogui.PAUSE = 0.0
 pyautogui.FAILSAFE = False
 
 cap: cv2.VideoCapture
-cam_margin = 0.15
+cam_margin = 0.2
 
 def posInMargin(x):
     if x < cam_margin:
@@ -26,7 +26,7 @@ def startCam():
     
     return int(width), int(height)
     
-def getFrame():
+def getFrame(show_margin=False):
     ret, frame = cap.read()
     
     if ret:
@@ -44,6 +44,12 @@ def getFrame():
         
         img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB)
         
+        if show_margin:
+            h, w = img.shape[:2]
+            start_point = int(w * cam_margin), int(h * cam_margin)
+            end_point = w - start_point[0], h - start_point[1]
+            
+            img = cv2.rectangle(img, start_point, end_point, (0, 0, 0), 2)
         
         return img
     else:

@@ -61,7 +61,7 @@ class MyApp(QWidget):
         print("cam stopped..")
 
     def update_frame(self):
-        img = cam.getFrame()
+        img = cam.getFrame(show_margin=True)
         if img is None:
             QMessageBox.about(win, "Error", "Cannot read frame.")
             print("cannot read frame.")
