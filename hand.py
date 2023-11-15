@@ -33,7 +33,6 @@ class Stabilizer:
 
         # stabilization
         diff = np.linalg.norm(self.prev_vec - vec)
-        print(diff)
         if diff < STABLE_RADIUS:
             return self.prev_vec[0], self.prev_vec[1]
         else:

@@ -5,7 +5,6 @@ import gesture as g
 import os  # for log message
 
 pyautogui.PAUSE = 0.0
-pyautogui.FAILSAFE = False
 
 cap: cv2.VideoCapture
 cam_margin = 0.2
@@ -68,8 +67,8 @@ def controlMouseByFrame():
         temp = recog_info.isFingerClose(2), recog_info.isFingerClose(3), recog_info.isFingerClose(4), recog_info.isFingerClose(5)
         gesture = tuple(int(not i) for i in temp)
         
-        # os.system("cls")
-        # print(gesture)
+        os.system("cls")
+        print(gesture)
         
         if gesture == g.middle_click:
             pyautogui.mouseDown(button="middle")
@@ -77,11 +76,11 @@ def controlMouseByFrame():
             pyautogui.mouseUp(button="middle")
             
         if gesture == g.shift_middle_click:
-            pyautogui.mouseDown(button="middle")
             pyautogui.keyDown("shift")
+            #pyautogui.mouseDown(button="middle")
         else:
-            pyautogui.mouseUp(button="middle")
             pyautogui.keyUp("shift")
+            #pyautogui.mouseUp(button="middle")
 
         if gesture == g.left_click:
             pyautogui.mouseDown(button="left")

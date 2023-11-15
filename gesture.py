@@ -8,8 +8,8 @@ no thumb
 (gesture) = index finger, middle finger, ring finger, pinky finger
 """
 
-middle_click = 0, 1, 0, 0
+middle_click = 1, 0, 1, 1
 
-shift_middle_click = 0, 1, 1, 0
+shift_middle_click = 1, 0, 0, 1
 
 left_click = 0, 1, 1, 1
