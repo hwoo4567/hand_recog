@@ -47,9 +47,9 @@ class MyApp(QWidget):
         # 카메라 업데이트를 위한 타이머 설정
         w, h = cam.startCam()
         self.video_label.resize(w, h)
-        
+
         self.timer = QTimer()
-        self.timer.timeout.connect(self.update_frame)
+        self.timer.timeout.connect(self.update_by_frame)
 
     def startCamera(self):
         if not self.timer.isActive():
@@ -59,8 +59,11 @@ class MyApp(QWidget):
     def stopCamera(self):
         self.timer.stop()
         print("cam stopped..")
+        
+    def update_by_frame(self):
+        cam.init()
+        cam.controlMouseByFrame()
 
-    def update_frame(self):
         img = cam.getFrame(show_margin=True)
         if img is None:
             QMessageBox.about(win, "Error", "Cannot read frame.")

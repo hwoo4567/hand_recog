@@ -3,7 +3,7 @@ import numpy as np
 import mediapipe as mp
 import typing
 
-FINGER_CLOSE_THRESHOLD = 0.1
+FINGER_CLOSE_THRESHOLD = 0.04
 
 mp_draw = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -48,7 +48,7 @@ class HandRecog:
         return self.frame
     
     # finger_n: 손가락 번호 (엄지: 1, 검지: 2 ...)
-    def isFingerClose(self, finger_n):
+    def isFingerClose(self, finger_n: int):
         if self.results.multi_hand_world_landmarks:
             # 여러 손이 인식되면 그 중 하나만
             handLms = self.results.multi_hand_world_landmarks[0]
@@ -56,16 +56,26 @@ class HandRecog:
             fingers = handLms.landmark  # index 0 - 20
             
             # n번째 손가락 끝의 번호 : n * 4
-            tip = fingers[int(finger_n * 4)]  # 검지 끝
-            hand_center = fingers[0]
+            tip_idx = finger_n * 4
+            # 손가락 뼈 3개를 벡터로 나타냄
+            bone1 = np.array([fingers[tip_idx - 2].x - fingers[tip_idx - 3].x, fingers[tip_idx - 2].y - fingers[tip_idx - 3].y])
+            bone2 = np.array([fingers[tip_idx - 1].x - fingers[tip_idx - 2].x, fingers[tip_idx - 1].y - fingers[tip_idx - 2].y])
+            bone3 = np.array([fingers[tip_idx].x - fingers[tip_idx - 1].x, fingers[tip_idx].y - fingers[tip_idx - 1].y])
             
-            d = dist(tip.x, tip.y, hand_center.x, hand_center.y)
+            d = np.linalg.norm(bone1 + bone2 + bone3)
             if d <= FINGER_CLOSE_THRESHOLD:
                 return True
             else:
                 return False
         
         return False
+    
+    def isAllClose(self):
+        # 엄지 빼고 전부
+        for i in (2, 3, 4, 5):
+            if not self.isFingerClose(i):
+                return False
+        return True
     
     def getPointFromIdx(self, idx: int) -> tuple[float, float]:
         if self.hands:
@@ -75,8 +85,6 @@ class HandRecog:
             point = fingers[idx]
             x, y = point.x, point.y
             
-            if self.tremor_correction:
-                x, y = self.correction(x, y)
             return x, y
         
         # 손이 없으면 항상 중간점
