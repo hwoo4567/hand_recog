@@ -27,8 +27,8 @@ class MyApp(QWidget):
         
     def initUI(self):
         self.setWindowTitle("Hand Recog")
-        self.move(300, 300)
-        self.resize(400, 200)
+        self.move(100, 100)
+        self.resize(500, 300)
         
         vbox = QVBoxLayout()
         self.video_label = QLabel()

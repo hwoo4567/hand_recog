@@ -15,7 +15,7 @@ def posInMargin(x):
     elif x > 1- cam_margin:
         return 1.0
     else:
-        return (x - 0.1) / (1 - cam_margin * 2)
+        return (x - cam_margin) / (1 - cam_margin * 2)
 
 def startCam():
     """ width, height"""
@@ -32,7 +32,7 @@ def init():
     ret, frame = cap.read()
     
     if ret:
-        recog_info = hand.HandRecog(cv2.flip(frame, 1))
+        recog_info = hand.HandRecog(cv2.flip(cv2.flip(frame, 0), 1))  # 상하, 좌우 반전
     else:
         recog_info = None
     
@@ -63,7 +63,7 @@ def controlMouseByFrame():
         
         pyautogui.moveTo(int(screen_x * x), int(screen_y * y))
         
-        print(recog_info.isFingerClose(2))
+        print(recog_info.isFingerClose(1), recog_info.isFingerClose(2), recog_info.isFingerClose(3), recog_info.isFingerClose(4), recog_info.isFingerClose(5))
         # if recog_info.isAllClose():
         #     pyautogui.mouseDown(button="middle")
         # else:
