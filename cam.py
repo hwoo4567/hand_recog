@@ -6,6 +6,15 @@ pyautogui.PAUSE = 0.0
 pyautogui.FAILSAFE = False
 
 cap: cv2.VideoCapture
+cam_margin = 0.15
+
+def posInMargin(x):
+    if x < cam_margin:
+        return 0.0
+    elif x > 1- cam_margin:
+        return 1.0
+    else:
+        return (x - 0.1) / (1 - cam_margin * 2)
 
 def startCam():
     """ width, height"""
@@ -25,12 +34,13 @@ def getFrame():
         recog_image = recog.drawHandPoint()
         
         if recog.handExists():
-            x, y = recog.getForefinger()
-            screenX, screenY = pyautogui.size()
+            cam_x, cam_y = recog.getForefinger()
+            screen_x, screen_y = pyautogui.size()
+            x, y = posInMargin(cam_x), posInMargin(cam_y)
             
-            pyautogui.moveTo(int(screenX * x), int(screenY * y))
+            pyautogui.moveTo(int(screen_x * x), int(screen_y * y))
         
-        # TODO: 손떨림 방지 기능 만들기, 손가락 인식에 margin 넣기
+        # TODO: 손떨림 방지 기능 만들기
         
         img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB)
         
