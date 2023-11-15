@@ -39,9 +39,7 @@ def getFrame(show_margin=False):
             x, y = posInMargin(cam_x), posInMargin(cam_y)
             
             pyautogui.moveTo(int(screen_x * x), int(screen_y * y))
-        
-        # TODO: 손떨림 방지 기능 만들기
-        
+                
         img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB)
         
         if show_margin:

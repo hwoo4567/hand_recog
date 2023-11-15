@@ -13,8 +13,9 @@ def dist(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
 class HandRecog:
-    # frame: image(MatLike) read from cap.read()
     def __init__(self, frame):
+        """frame: image(MatLike) read from cap.read()"""
+        
         self.frame = frame
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -65,15 +66,18 @@ class HandRecog:
                 return False
         
         return False
-        
+    
     def getPointFromIdx(self, idx: int) -> tuple[float, float]:
         if self.hands:
             # 여러 손이 인식되면 그 중 하나만
             handLms = self.hands[0]
             fingers = handLms.landmark  # index 0 - 20
-            center = fingers[idx]
-                        
-            return center.x, center.y
+            point = fingers[idx]
+            x, y = point.x, point.y
+            
+            if self.tremor_correction:
+                x, y = self.correction(x, y)
+            return x, y
         
         # 손이 없으면 항상 중간점
         return 0.5, 0.5
