@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-import os  # temp: for debug
+import typing
 
 FINGER_CLOSE_THRESHOLD = 0.1
 
@@ -17,12 +17,23 @@ class HandRecog:
     def __init__(self, frame):
         self.frame = frame
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        self.results = hands.process(rgb_frame)
-                
+
+        if rgb_frame is not None:
+            self.results = hands.process(rgb_frame)
+        else:
+            raise TypeError("카메라가 존재하지 않습니다.")
+        
+        self.hands: typing.NamedTuple = self.results.multi_hand_landmarks
+        
+    def handExists(self):
+        if self.hands:
+            return True
+        return False
+
     def drawHandPoint(self):
-        if self.results.multi_hand_landmarks:
+        if self.hands:
             # 각 손에 대한 반복
-            for handLms in self.results.multi_hand_landmarks:
+            for handLms in self.hands:
                 for id, lm in enumerate(handLms.landmark):
                     h, w, c = self.frame.shape
                     cx, cy = int(lm.x * w), int(lm.y * h)
@@ -36,7 +47,7 @@ class HandRecog:
         return self.frame
     
     # finger_n: 손가락 번호 (엄지: 1, 검지: 2 ...)
-    def fingerClose(self, finger_n):
+    def isFingerClose(self, finger_n):
         if self.results.multi_hand_world_landmarks:
             # 여러 손이 인식되면 그 중 하나만
             handLms = self.results.multi_hand_world_landmarks[0]
@@ -52,24 +63,25 @@ class HandRecog:
                 return True
             else:
                 return False
-        else:
-            return False
+        
+        return False
         
     def getPointFromIdx(self, idx: int) -> tuple[float, float]:
-        if self.results.multi_hand_landmarks:
+        if self.hands:
             # 여러 손이 인식되면 그 중 하나만
-            handLms = self.results.multi_hand_landmarks[0]
+            handLms = self.hands[0]
             fingers = handLms.landmark  # index 0 - 20
             center = fingers[idx]
                         
             return center.x, center.y
         
-        return -1.0, -1.0
+        # 손이 없으면 항상 중간점
+        return 0.5, 0.5
     
-    def getCenterPoint(self) -> tuple[float, float]:  # x, y 범위 0 ~ 1
+    def getCenter(self) -> tuple[float, float]:  # x, y 범위 0 ~ 1
         return self.getPointFromIdx(0)  # 손바닥
     
-    def getForefingerPoint(self) -> tuple[float, float]:
+    def getForefinger(self) -> tuple[float, float]:
         return self.getPointFromIdx(8)  # 검지 손가락 끝
 
 def closeHandModel():

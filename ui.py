@@ -1,5 +1,4 @@
 import cv2
-import threading
 import sys
 from PyQt5.QtWidgets import (
     QApplication,
@@ -15,51 +14,12 @@ from PyQt5.QtGui import (
     # event
     QCloseEvent,
 )
-from PyQt5.QtCore import *
+from PyQt5.QtCore import (
+    Qt,
+    QTimer,
+)
 
-import hand
-import pyautogui
-
-image_flip = True
-cam_running = False
-pyautogui.PAUSE = 0.0
-pyautogui.FAILSAFE = False
-
-def runCamera(video_label: QLabel):
-    global cam_running
-    cap = cv2.VideoCapture(0)
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    video_label.resize(int(width), int(height))
-    
-    while cam_running:
-        ret, frame = cap.read()
-        
-        if ret:
-            recog = hand.HandRecog(cv2.flip(frame, 1))
-            recog_image = recog.drawHandPoint()
-            x, y = recog.getForefingerPoint()
-            screen = QApplication.primaryScreen().size()
-            screenX, screenY = screen.width(), screen.height()
-            
-            pyautogui.moveTo(int(screenX * x), int(screenY * y))
-            
-            # TODO: 손떨림 방지 기능 만들기, 손가락 인식에 margin 넣기
-            
-            img = cv2.cvtColor(recog_image, cv2.COLOR_BGR2RGB)
-            h, w, c = img.shape
-
-            qImg = QImage(img.data, w, h, w*c, QImage.Format.Format_RGB888)
-            pixmap = QPixmap.fromImage(qImg)
-            video_label.setPixmap(pixmap)
-        else:
-            QMessageBox.about(win, "Error", "Cannot read frame.")
-            print("cannot read frame.")
-            break
-
-    cap.release()
-    print("Cam off")
-
+import cam
 
 class MyApp(QWidget):
     def __init__(self):
@@ -81,32 +41,46 @@ class MyApp(QWidget):
         vbox.addWidget(btn_start)
         vbox.addWidget(btn_stop)
         self.setLayout(vbox)
-        self.show()
 
         btn_start.clicked.connect(self.startCamera)
         btn_stop.clicked.connect(self.stopCamera)
-
-        self.show()
+        
+        # 카메라 업데이트를 위한 타이머 설정
+        w, h = cam.startCam()
+        self.video_label.resize(w, h)
+        
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_frame)
 
     def startCamera(self):
-        global cam_running
-        cam_running = True
-        th = threading.Thread(target=lambda: runCamera(self.video_label))
-        th.start()
-        print("cam on..")
+        if not self.timer.isActive():
+            self.timer.start(1000 // 30)  # 매 1/30초마다 업데이트
+            print("cam on..")
         
     def stopCamera(self):
-        global cam_running
-        cam_running = False
+        self.timer.stop()
         print("cam stopped..")
+
+    def update_frame(self):
+        img = cam.getFrame()
+        if img is None:
+            QMessageBox.about(win, "Error", "Cannot read frame.")
+            print("cannot read frame.")
+            return
+            
+        h, w, c = img.shape
+        qImg = QImage(img.data, w, h, w*c, QImage.Format.Format_RGB888)
+        pixmap = QPixmap.fromImage(qImg)
+        self.video_label.setPixmap(pixmap)
 
     def closeEvent(self, e: QCloseEvent | None) -> None:
         self.stopCamera()
-        hand.closeHandModel()  #* must close the model
+        cam.closeCam()
         print("exit")
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = MyApp()
+    win.show()
     sys.exit(app.exec_())
