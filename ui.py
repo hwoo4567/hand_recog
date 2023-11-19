@@ -32,11 +32,13 @@ class MyApp(QWidget):
         
         vbox = QVBoxLayout()
         self.video_label = QLabel()
+        self.info_label = QLabel(text="...")
         btn_start = QPushButton("Camera On")
         btn_stop = QPushButton("Camera Off")
 
         self.video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         vbox.addWidget(self.video_label)
+        vbox.addWidget(self.info_label)
         vbox.addWidget(btn_start)
         vbox.addWidget(btn_stop)
         self.setLayout(vbox)
@@ -63,6 +65,9 @@ class MyApp(QWidget):
     def update_by_frame(self):
         cam.init()
         cam.controlMouseByFrame()
+        
+        info = cam.getInfo()
+        self.info_label.setText(info)
 
         img = cam.getFrame(show_margin=True)
         if img is None:

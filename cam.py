@@ -2,12 +2,15 @@ import cv2
 import hand
 import control
 import gesture as g
-import os  # for log message
-
 
 cap: cv2.VideoCapture
 cam_margin = 0.2
 recog_info = None
+
+# global
+mouse_pos = (0.0, 0.0)
+hand_state = (0, 0, 0, 0)
+
 
 def posInMargin(x):
     if x < cam_margin:
@@ -53,6 +56,8 @@ def getFrame(show_margin=False):
     return img
 
 def controlMouseByFrame():
+    global mouse_pos, hand_state
+    
     if recog_info is None:
         return
     
@@ -60,12 +65,14 @@ def controlMouseByFrame():
         screen_x, screen_y = control.get_screen_size()
         cam_x, cam_y = recog_info.getStandardPoint()
         x, y = posInMargin(cam_x), posInMargin(cam_y)
+        mouse_pos = x, y
         
         control.moveTo(int(screen_x * x), int(screen_y * y))
         
         temp = recog_info.isFingerClose(2), recog_info.isFingerClose(3), recog_info.isFingerClose(4), recog_info.isFingerClose(5)
         gesture = tuple(int(not i) for i in temp)
-
+        hand_state = gesture
+        
         # tinkercad gesture
         if gesture == g.rotation_view:
             control.mouseDown("right")
@@ -77,10 +84,13 @@ def controlMouseByFrame():
             control.mouseUp("right")
             control.mouseUp("middle")
             control.mouseUp("left")
-        
-        # os.system("cls")
-        # print(gesture)
-        
+
+def getInfo():
+    global mouse_pos, hand_state
+    simpler = tuple(round(i, 3) for i in mouse_pos)
+    
+    return f"mouse_pos: {simpler}, hand_state: {hand_state}"
+
 def closeCam():
     global cap
     
