@@ -66,27 +66,22 @@ def controlMouseByFrame():
         
         temp = recog_info.isFingerClose(2), recog_info.isFingerClose(3), recog_info.isFingerClose(4), recog_info.isFingerClose(5)
         gesture = tuple(int(not i) for i in temp)
-        
+                
+        # tinkercad gesture
+        if gesture == g.rotation_view:
+            pyautogui.mouseDown(button="right")
+        elif gesture == g.pan_view:
+            pyautogui.mouseDown(button="middle")
+        elif gesture == g.left_click:
+            pyautogui.mouseDown(button="left")
+        else:
+            pyautogui.mouseUp(button="middle")
+            pyautogui.mouseUp(button="left")
+            pyautogui.mouseUp(button="right")
+            
         os.system("cls")
         print(gesture)
         
-        if gesture == g.middle_click:
-            pyautogui.mouseDown(button="middle")
-        else:
-            pyautogui.mouseUp(button="middle")
-            
-        if gesture == g.shift_middle_click:
-            pyautogui.keyDown("shift")
-            #pyautogui.mouseDown(button="middle")
-        else:
-            pyautogui.keyUp("shift")
-            #pyautogui.mouseUp(button="middle")
-
-        if gesture == g.left_click:
-            pyautogui.mouseDown(button="left")
-        else:
-            pyautogui.mouseUp(button="left")
-
 def closeCam():
     global cap
     

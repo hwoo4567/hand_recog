@@ -1,15 +1,16 @@
 """
-Gesture for controlling Blender
+Gesture for controlling tkinercad
+https://www.tinkercad.com/dashboard?type=tinkercad&collection=designs
 
 0: folded finger
 1: stretched finger
 
 no thumb
-(gesture) = index finger, middle finger, ring finger, pinky finger
+(gesture) = tuple(index finger, middle finger, ring finger, pinky finger)
 """
 
-middle_click = 1, 0, 1, 1
+rotation_view = 1, 0, 0, 1
 
-shift_middle_click = 1, 0, 0, 1
+pan_view = 1, 0, 0, 0
 
 left_click = 0, 1, 1, 1

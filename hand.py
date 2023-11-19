@@ -1,4 +1,3 @@
-from typing import Any
 import cv2
 import numpy as np
 import mediapipe as mp
@@ -84,22 +83,29 @@ class HandRecog:
         if self.results.multi_hand_world_landmarks:
             # 여러 손이 인식되면 그 중 하나만
             handLms = self.results.multi_hand_world_landmarks[0]
-            
             fingers = handLms.landmark  # index 0 - 20
             
             # n번째 손가락 끝의 번호 : n * 4
             tip_idx = finger_n * 4
             # 손가락 뼈 3개를 벡터로 나타냄
-            bone1 = np.array([fingers[tip_idx - 2].x - fingers[tip_idx - 3].x, fingers[tip_idx - 2].y - fingers[tip_idx - 3].y])
-            bone2 = np.array([fingers[tip_idx - 1].x - fingers[tip_idx - 2].x, fingers[tip_idx - 1].y - fingers[tip_idx - 2].y])
-            bone3 = np.array([fingers[tip_idx].x - fingers[tip_idx - 1].x, fingers[tip_idx].y - fingers[tip_idx - 1].y])
-            
+            bone1 = np.array([
+                fingers[tip_idx - 2].x - fingers[tip_idx - 3].x,
+                fingers[tip_idx - 2].y - fingers[tip_idx - 3].y
+            ])
+            bone2 = np.array([
+                fingers[tip_idx - 1].x - fingers[tip_idx - 2].x,
+                fingers[tip_idx - 1].y - fingers[tip_idx - 2].y
+            ])
+            bone3 = np.array([
+                fingers[tip_idx].x - fingers[tip_idx - 1].x,
+                fingers[tip_idx].y - fingers[tip_idx - 1].y
+            ])
             d = np.linalg.norm(bone1 + bone2 + bone3)
             if d <= FINGER_CLOSE_THRESHOLD:
                 return True
             else:
                 return False
-        
+
         return False
     
     def isAllClose(self):
