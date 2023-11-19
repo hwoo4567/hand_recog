@@ -27,7 +27,8 @@ class MyApp(QWidget):
         
     def initUI(self):
         self.setWindowTitle("Hand Recog")
-        self.move(100, 100)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+        self.move(20, 20)
         self.resize(500, 400)
         
         vbox = QVBoxLayout()
