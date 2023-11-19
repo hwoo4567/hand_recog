@@ -1,10 +1,9 @@
 import cv2
-import pyautogui
 import hand
+import control
 import gesture as g
 import os  # for log message
 
-pyautogui.PAUSE = 0.0
 
 cap: cv2.VideoCapture
 cam_margin = 0.2
@@ -58,29 +57,29 @@ def controlMouseByFrame():
         return
     
     if recog_info.handExists():
+        screen_x, screen_y = control.get_screen_size()
         cam_x, cam_y = recog_info.getStandardPoint()
-        screen_x, screen_y = pyautogui.size()
         x, y = posInMargin(cam_x), posInMargin(cam_y)
         
-        pyautogui.moveTo(int(screen_x * x), int(screen_y * y), duration=0.1)
+        control.moveTo(int(screen_x * x), int(screen_y * y))
         
         temp = recog_info.isFingerClose(2), recog_info.isFingerClose(3), recog_info.isFingerClose(4), recog_info.isFingerClose(5)
         gesture = tuple(int(not i) for i in temp)
-                
+
         # tinkercad gesture
         if gesture == g.rotation_view:
-            pyautogui.mouseDown(button="right")
+            control.mouseDown("right")
         elif gesture == g.pan_view:
-            pyautogui.mouseDown(button="middle")
+            control.mouseDown("middle")
         elif gesture == g.left_click:
-            pyautogui.mouseDown(button="left")
+            control.mouseDown("left")
         else:
-            pyautogui.mouseUp(button="middle")
-            pyautogui.mouseUp(button="left")
-            pyautogui.mouseUp(button="right")
-            
-        os.system("cls")
-        print(gesture)
+            control.mouseUp("right")
+            control.mouseUp("middle")
+            control.mouseUp("left")
+        
+        # os.system("cls")
+        # print(gesture)
         
 def closeCam():
     global cap
